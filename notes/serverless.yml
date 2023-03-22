@@ -1,0 +1,56 @@
+service: mj-notes-service
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: us-east-1
+  endpointType: REGIONAL
+  environment:
+    NOTES_TABLE: mj-global-service-dev-NotesTable-1ACKV26N2PPZD
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/mj-global-service-dev-NotesTable-1ACKV26N2PPZD"
+
+functions:
+  getNote:
+    handler: functions/notes.getNote
+    events:
+      - http:
+          path: notes/{id}
+          method: get
+          cors: true
+
+  createNote:
+    handler: functions/notes.createNote
+    events:
+      - http:
+          path: notes
+          method: post
+          cors: true
+
+  updateNote:
+    handler: functions/notes.updateNote
+    events:
+      - http:
+          path: notes/{id}
+          method: put
+          cors: true
+
+
+  deleteNote:
+    handler: functions/notes.deleteNote
+    events:
+      - http:
+          path: notes/{id}
+          method: delete
+          cors: true
